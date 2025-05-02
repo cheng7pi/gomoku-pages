@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>五子棋單人版</title>
+  <style>
+    canvas { background: burlywood; display: block; margin: 20px auto; }
+    body { text-align: center; font-family: sans-serif; }
+  </style>
+</head>
+<body>
+  <h2>五子棋（單人版）</h2>
+  <canvas id="board" width="600" height="600"></canvas>
+  <p id="status">請點擊棋盤下棋</p>
+  <button onclick="resetGame()">重置棋盤</button>
+
+  <script>
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+    const size = 15;
+    const cell = canvas.width / size;
+    const board = Array.from({ length: size }, () => Array(size).fill(''));
+    let currentPlayer = 'black';
+    let gameOver = false;
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < size; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cell / 2, cell / 2 + i * cell);
+        ctx.lineTo(cell * (size - 0.5), cell / 2 + i * cell);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cell / 2 + i * cell, cell / 2);
+        ctx.lineTo(cell / 2 + i * cell, cell * (size - 0.5));
+        ctx.stroke();
+      }
+    }
+
+    function drawStone(x, y, color) {
+      ctx.beginPath();
+      ctx.arc(cell / 2 + x * cell, cell / 2 + y * cell, cell / 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'dimgray';
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    canvas.addEventListener('click', e => {
+      if (gameOver) return;
+      const x = Math.floor(e.offsetX / cell);
+      const y = Math.floor(e.offsetY / cell);
+      if (board[y][x]) return;
+      board[y][x] = currentPlayer;
+      drawStone(x, y, currentPlayer);
+      if (checkWin(x, y, currentPlayer)) {
+        document.getElementById('status').textContent = `${currentPlayer === 'black' ? '黑子' : '白子'}獲勝！`;
+        gameOver = true;
+        return;
+      }
+      currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+      document.getElementById('status').textContent = `輪到${currentPlayer === 'black' ? '黑子' : '白子'}`;
+    });
+
+    function checkWin(x, y, color) {
+      const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+      for (let [dx, dy] of dirs) {
+        let count = 1;
+        for (let d of [1, -1]) {
+          let nx = x + dx * d, ny = y + dy * d;
+          while (board[ny]?.[nx] === color) {
+            count++;
+            nx += dx * d;
+            ny += dy * d;
+          }
+        }
+        if (count >= 5) return true;
+      }
+      return false;
+    }
+
+    function resetGame() {
+      for (let y = 0; y < size; y++) board[y].fill('');
+      currentPlayer = 'black';
+      gameOver = false;
+      drawBoard();
+      document.getElementById('status').textContent = "請點擊棋盤下棋";
+    }
+
+    drawBoard();
+  </script>
+</body>
+</html>
