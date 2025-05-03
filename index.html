@@ -13,6 +13,7 @@
   <canvas id="board" width="600" height="600"></canvas>
   <p id="status">請點擊棋盤下棋</p>
   <button onclick="resetGame()">重置棋盤</button>
+  <button onclick="toggleColorMode()">切換棋子顏色模式</button>
 
   <script>
     const canvas = document.getElementById('board');
@@ -22,6 +23,7 @@
     const board = Array.from({ length: size }, () => Array(size).fill(''));
     let currentPlayer = 'black';
     let gameOver = false;
+    let colorMode = 'gray'; // 可選值：gray, dual
 
     function drawBoard() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,7 +42,11 @@
     function drawStone(x, y, color) {
       ctx.beginPath();
       ctx.arc(cell / 2 + x * cell, cell / 2 + y * cell, cell / 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'dimgray';
+      if (colorMode === 'gray') {
+        ctx.fillStyle = 'dimgray';
+      } else {
+        ctx.fillStyle = color === 'black' ? 'black' : 'white';
+      }
       ctx.fill();
       ctx.stroke();
     }
@@ -84,6 +90,20 @@
       gameOver = false;
       drawBoard();
       document.getElementById('status').textContent = "請點擊棋盤下棋";
+    }
+
+    function toggleColorMode() {
+      colorMode = (colorMode === 'gray') ? 'dual' : 'gray';
+      redrawStones();
+    }
+
+    function redrawStones() {
+      drawBoard();
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (board[y][x]) drawStone(x, y, board[y][x]);
+        }
+      }
     }
 
     drawBoard();
